@@ -26,7 +26,7 @@ If the file doesn't exist or a key is absent, use the default. Do not error — 
 Use Glob to find all files in these locations relative to the project root or `~/.claude/`:
 
 - `~/.claude/agents/*.md` — agent definitions
-- `~/.claude/skills/*/SKILL.md` — skills
+- `~/.claude/skills/**/SKILL.md` — skills (use `**` not `*` — single-level glob fails)
 - `~/.claude/commands/**/*.md` — commands
 
 Skip these:
@@ -215,12 +215,13 @@ Confirm? (enter/yes to lock, number to expand, eN to explain, 'show all' to show
 
 | Input | Action |
 |-------|--------|
-| Empty, "yes", "ok", "looks good", "confirm" | Lock all selections, exit loop |
+| Empty, "yes", "ok", "looks good", "confirm" | Lock all selections, auto-execute |
 | A number like "3" | Expand task 3: show all scored alternatives for that task, wait for selection |
 | "e3" or "explain 3" | Show full scoring breakdown for task 3 (matched tags, score, penalty if any), return to list |
 | "no", "start over", "redo" | Re-run scoring from scratch |
 | "show all" | Show gap-tier tools inline; nothing is locked yet |
 | "show more" | Show remaining recommended tools beyond the display cap |
+| Relational freeform (sequence, order, dependency language) | **NOT confirmation.** Treat as loadout adjustment. Examples: "those are sequential not alternatives", "#1 and #3 together", "run these in order" → acknowledge the relationship, re-present the loadout, wait for explicit confirmation |
 | Anything else | Interpret freeform naturally. Examples: "swap 2 and 4", "use helix-debate for task 3", "drop task 5" |
 
 **Rules:**
@@ -228,7 +229,27 @@ Confirm? (enter/yes to lock, number to expand, eN to explain, 'show all' to show
 - Never ask more than one clarifying question per turn.
 - `rejectedTools` — track tools the user has explicitly dismissed ("not that one", swapping a tool out). Never re-surface rejected tools for that task in the same session.
 - On task expand: show all alternatives with scores. User types a number to lock that selection, or "back" to return without changing.
-- On lock: output the final confirmed loadout, then exit. Do not write settings.json or take any further action unless separately instructed.
+- **Relational input is not confirmation.** If the user describes how tools relate to each other (sequence, dependency, ordering), that is feedback about the loadout — not a yes. Acknowledge it, adjust if needed, re-present, and wait.
+
+**On lock — auto-execute:**
+
+After confirmation, output the locked loadout summary, then immediately invoke each selected tool in loadout order using the Skill or Agent tool. Do not stop and wait for the user to invoke them separately.
+
+```
+=== LOCKED ===
+1. [tool-name] — executing now
+2. [tool-name] — will run after #1
+...
+```
+
+Invoke each tool based on its type:
+- `skill` → use the Skill tool
+- `agent` → use the Agent tool
+- `command` → cannot be auto-invoked (commands are slash commands); tell the user to run it manually
+
+When tool #1 completes, invoke tool #2. Continue until all locked tools have run. Report completion after each.
+
+Execution order = loadout order (top to bottom). No need to ask — the user confirmed the order when they confirmed the loadout.
 
 ## Invocation
 

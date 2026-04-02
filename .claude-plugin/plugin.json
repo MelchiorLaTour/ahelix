@@ -1,0 +1,22 @@
+{
+  "name": "ahelix",
+  "description": "AHelix tool orchestrator + Helix Debate multi-agent system + Buddy companion onboarding",
+  "version": "1.0.0",
+  "author": {
+    "name": "MelchiorLaTour",
+    "github": "MelchiorLaTour"
+  },
+  "homepage": "https://github.com/MelchiorLaTour/ahelix",
+  "repository": "https://github.com/MelchiorLaTour/ahelix",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "tool-orchestration",
+    "debate",
+    "multi-agent",
+    "companion",
+    "pet",
+    "ahelix",
+    "helix-debate"
+  ]
+}
