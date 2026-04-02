@@ -1,0 +1,12 @@
+{
+  "granularity": "coarse",
+  "parallel_execution": false,
+  "commit_docs": true,
+  "yolo_mode": true,
+  "research_before_phase": false,
+  "agents": {
+    "executor": "sonnet",
+    "planner": "sonnet",
+    "verifier": "sonnet"
+  }
+}
